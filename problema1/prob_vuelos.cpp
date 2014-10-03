@@ -43,51 +43,64 @@ int main() {
 		
 		/* Relleno "combinaciones" y "puedoLlegar" dinámicamente para todos los pares de vuelos */
 		for(int i=0; i<n; i++) {
-			for(int j=0; j<n; j++) {									// PUEDO ARRANCAR DESDE i+1 ???
+			for(int j=0; j<n; j++) {									
 				if(vuelos[i].destino == vuelos[j].origen && 
                    vuelos[i].fin + 2 <= vuelos[j].inicio) {				// camino directo i->j
 					   combinaciones[j] |= (1<<i);
 					   if((puedoLlegar & (1<<i)) != 0) {puedoLlegar |= (1<<j); }
 				}
-				if(vuelos[j].destino == vuelos[i].origen && 
-                   vuelos[j].fin + 2 <= vuelos[i].inicio) {				// camino directo j->i
-					   combinaciones[i] |= (1<<j); 
-					   if((puedoLlegar & (1<<j)) != 0) {puedoLlegar |= (1<<i); }
-				}
+				//~ if(vuelos[j].destino == vuelos[i].origen && 
+                   //~ vuelos[j].fin + 2 <= vuelos[i].inicio) {				// camino directo j->i
+					   //~ combinaciones[i] |= (1<<j); 
+					   //~ if((puedoLlegar & (1<<j)) != 0) {puedoLlegar |= (1<<i); }
+				//~ }
 			}
 		}
 		
 		/* Relleno "combinaciones" y "puedoLlegar" dinámicamente de forma completa */
 		for(int i=0; i<n;i++) {
-			for(int j=0; j<n; j++) {									// PUEDO ARRANCAR DESDE i+1 ???
+			for(int j=0; j<i+1; j++) {				
 				if((combinaciones[i] & (1<<j)) != 0) {							// si existe camino j --> i actualizo desde qué vuelos puedo llegar al vuelo i
 					if((puedoLlegar & (1<<j)) != 0) {puedoLlegar |= (1<<i); }	// y también actualizo a qué vuelos puedo llegar desde A.
 					combinaciones[i] |= combinaciones[j];
 				}
-				if((combinaciones[j] & (1<<i)) != 0) {							// si existe camino i --> j actualizo desde qué vuelos puedo llegar al vuelo j
-					if((puedoLlegar & (1<<i)) != 0) {puedoLlegar |= (1<<j); }	// y también actualizo a qué vuelos puedo llegar desde A.
-					combinaciones[j] |= combinaciones[i];
-				}
+				//~ if((combinaciones[j] & (1<<i)) != 0) {							// si existe camino i --> j actualizo desde qué vuelos puedo llegar al vuelo j
+					//~ if((puedoLlegar & (1<<i)) != 0) {puedoLlegar |= (1<<j); }	// y también actualizo a qué vuelos puedo llegar desde A.
+					//~ combinaciones[j] |= combinaciones[i];
+				//~ }
 			}
 		}
-
+		
 		/* Devolver resultado */
 		horarioLlegada = INF;
 		for(int i=0; i<n; i++) {
-			if(((puedoLlegar & (1<<i)) != 0) && (vuelos[i].destino==B)){horarioLlegada = min(horarioLlegada, vuelos[i].fin); ultimo = i; }
+			if(((puedoLlegar & (1<<i)) != 0) && (vuelos[i].destino==B)){
+				if(vuelos[i].fin < horarioLlegada) {
+					horarioLlegada = vuelos[i].fin; 
+					ultimo = i; 
+			    }
+			}
 		}
+		
 		if(horarioLlegada==INF){
-			cerr<<"no"<<endl;
+			cout<<"no"<<endl;
 		}else{
+			vector<int> usados(n, 0);		// inicializo un vector de vuelos usados en 0
 			res.push_back(ultimo);
 			while(vuelos[ultimo].origen != A) {
 				for(int i=0; i<n; i++) {
-						if(vuelos[i].destino == vuelos[ultimo].origen) {ultimo = i; res.push_back(ultimo); break; }
+						if(vuelos[i].destino == vuelos[ultimo].origen &&
+						   ((puedoLlegar & (1<<i)) != 0) && (usados[i] == 0)) {
+							ultimo = i; 
+							usados[i] = 1;
+							res.push_back(ultimo); 
+							break; 
+						}
 				}
 			}
-			cerr << horarioLlegada << " " << res.size() << " ";
-			for(int i=res.size() - 1; i>= 0; i--) {cerr << res[i] << " ";}
-			cerr << endl;
+			cout << horarioLlegada << " " << res.size() << " ";
+			for(int i=res.size() - 1; i>= 0; i--) {cout << res[i] << " ";}
+			cout << endl;
 		}
 	}
 	
