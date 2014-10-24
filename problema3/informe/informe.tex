@@ -170,14 +170,63 @@ generadores de G y $e$ el mínimo eje perteneciente a $G \backslash T$ vale que:
 $costo(T+e) = \min\limits_{\substack{f \in G \backslash T \\ T' \in S}} costo(T'+f)$
 \end{prop}
 \begin{proof}[Demostración de la Proposición 1] 
-Demostraremos ambas desigualdades:
-\begin{flushleft} $\leq$ : en este caso, vale que $ costo(T) \leq costo(T')$ y además $costo(e) <= costo(f) $. 
-Entonces, es evidente que $ costo(T+e) = costo(T)+costo(e) \leq costo(T')+costo(f) = costo(T'+f) $  FALTAN COSAS \\
-$\geq$ : Tomando $T'=T$ y $f=e$, tenemos que $costo(T'+f)=costo(T+e)$. 
-Entonces, sigue que $ \min\limits_{\substack{f \in G \backslash T \\ T' \in S}} costo(T'+f) \leq costo(T+e) $
-\end{flushleft}
+Primero, vamos a demostrar dos lemas: 
+\begin{enumerate}
+  \item si $S_{opt}$ es una solución óptima al problema (es algún subgrafo conexo  de G
+		con algún ciclo), entonces $S_{opt}$ contiene a algún AGM de G.
+		
+		\begin{proof}[Demo de 1]
+		Supongamos que $S_{opt}$ \textbf{no contiene} un AGM de G. Entonces, queremos ver que
+		$S_{opt}$ no puede ser solución óptima para nuestro problema (hay alguna solución mejor).
+		Claramente, si $S_{opt}$ contuviera algún AGM de G, entonces dicho árbol generador
+		podría construirse tomando algún eje $e$ del ciclo que se forma en $S_{opt}$, y generando
+		el grafo $G' = S_{opt} - \{e\}$. Pero, supongamos que al quitar cualquier eje $e$ del ciclo
+		que se forma en $S_{opt}$, el árbol que queda no es un AGM. 
+		\end{proof}
+  
+  \item dado un grafo G, si tomo algún AGM de G entonces la longitud de la mínima 
+        arista de las que están en G $\backslash$ T es siempre la misma.
+        
+        \begin{proof}[Demo de 2]
+		Supongamos que $T$ y $T'$ son dos AGM's distintos y que la arista de menor longitud 
+		que queda en $G \backslash T$ es $e$ mientras que la de menor longitud que queda en
+		$G \backslash T'$ es $f$ y además supongamos que peso($e$) $<$ peso ($f$). Entonces,
+		como $T$ y $T'$ son árboles y están construidos sobre el mismo grafo $G$, sabemos que
+		tienen la misma cantidad de aristas y $e \in T'$ pues de lo contrario $e$ sería el mínimo
+		eje perteneciente a $G \backslash T'$ y no $f$.\\
+		Ahora, supongamos que formamos el grafo 
+		$H = T + \{e\}$. Se forma un ciclo: $e_{1}, e_{2} \dots e_{1}$, donde long($e$) $\geq$ 
+		long($e_{i}$) (puesto que de lo contrario, podríamos obtener el árbol $T + \{e\} - \{e_{i}\}$, de 
+		longitud menor que T) y además, \textbf{no todos} 
+		los ejes $e_{i}$ están incluidos en $T'$, puesto que por hipótesis, $e \in T'$ y entonces
+		$e$ formaría un ciclo en $T'$ con $e_{1} e_{2} \dots$, lo cual es absurdo porque $T'$ es un
+		árbol y no puede tener ciclos.
+		Luego, si $e_{k} \not\in T'$, como long($e_{k}$) $\leq$ long($e$) $<$ long($f$), $f$ no 
+		era la arista más chica de $G \backslash T'$ (Absurdo). Entonces, concluimos que 
+		peso($e$) $\geq$ peso($f$). Haciendo la misma demostración, pero con la hipótesis de que
+		peso($f$) $<$ peso ($e$) obtendríamos exactamente la desigualdad opuesta. 
+		Entonces, concluimos que peso($e$) $=$ peso ($f$) siempre, lo cual implica que 
+		la longitud de la mínima arista de las que están en $G \backslash T$ tiene siempre de 
+		la misma longitud, sin importar que AGM $T$ se elija.
+		\end{proof}
+\end{enumerate}
+Entonces, si consideramos cualquier AGM $T$ de $G$, por lo demostrado en el punto 2, la
+longitud de la mínima arista de las que quedan (llamémosla $e$) es siempre la misma.
+Entonces, para cualquier AGM $T$ que elijamos, la longitud del grafo $ G'' = T + \{e\} $
+también es siempre la misma, porque todos los AGM's de un grafo tienen que tener la misma
+longitud. Entonces, sea $G_{opt}$ la solución óptima del problema para el grafo $G$. 
+Por lo visto en el punto 1, $G_{opt}$ contiene un AGM de $G$. Supongamos que contiene 
+al AGM $T$. Entonces, como además sabemos que $G_{opt}$ tiene un único ciclo, seguro que
+$G_{opt} = T + \{e\}$ para algún eje $e$ que está en $G$ pero no en $T$. Pero para que 
+$G_{opt}$ sea de longitud mínima, la longitud de $e$ debe ser menor o igual que la 
+longitud de $f$ para cualquier eje $f \in G \backslash T$. Entonces, 
+$G_{opt} = T + \{e\}$ donde $T$ es algún AGM de $G$ y $e$ es un eje perteneciente a
+$G \backslash T$ y de longitud mínima en ese conjunto, y además la longitud de
+$G_{opt} = T + \{e\}$ es siempre la misma, independientemente del AGM $T$ que hayamos
+elegido. Esto es lo que queríamos demostrar.
 \end{proof}
 
+\newpage
 \subsection{Justificación de cota de complejidad}
 
 \begin{algorithm}[H]
