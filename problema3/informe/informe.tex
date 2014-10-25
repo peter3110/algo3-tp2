@@ -176,12 +176,23 @@ Primero, vamos a demostrar dos lemas:
 		con algún ciclo), entonces $S_{opt}$ contiene a algún AGM de G.
 		
 		\begin{proof}[Demo de 1]
-		Supongamos que $S_{opt}$ \textbf{no contiene} un AGM de G. Entonces, queremos ver que
-		$S_{opt}$ no puede ser solución óptima para nuestro problema (hay alguna solución mejor).
-		Claramente, si $S_{opt}$ contuviera algún AGM de G, entonces dicho árbol generador
-		podría construirse tomando algún eje $e$ del ciclo que se forma en $S_{opt}$, y generando
-		el grafo $G' = S_{opt} - \{e\}$. Pero, supongamos que al quitar cualquier eje $e$ del ciclo
-		que se forma en $S_{opt}$, el árbol que queda no es un AGM. 
+		Sea $S_{opt}$ una solución óptima para el probelma. Entonces, $S_{opt}$ tiene un único ciclo
+		porque si tuviera más de uno, como todos los ejes son de peso positivo, podríamos quitar un
+		eje de todos menos uno de esos ciclos, y quedaría una solución $S'_{opt}$ mejor que $S_{opt}$.
+		Consideremos una solución óptima: $S_{opt} = T + \{k\}$ donde $T$ es algún árbol que visita 
+		todos los nodos de $G$. Y por otro lado consideremos un AGM de $G$: $T'$. Seguro que en el ciclo
+		que se forma en $S_{opt}$ hay algún eje $e$ tal que $e \not\in T'$ puesto que $T'$ es un árbol y 
+		por lo tanto no puede tener ciclos. Entonces, consideremos esta otra solución no necesariamente 
+		óptima para nuestro problema: $S' = T' + \{e\}$. Entonces, por un lado, como $S_{opt}$ es una solución
+		óptima y $S'$ no necesariamente, vale que peso($S_{opt}$) $\leq$ peso($S'$). Por otro lado, como $e$
+		esta incluido en el ciclo que se forma en $S_{opt}$, podemos reescribir a $S_{opt}$ como 
+		$S_{opt} = T'' + \{e\}$ donde $T''$ es un árbol no necesariamente mínimo, que visita todos los nodos
+		de $G$. Luego, vale que peso($T'$) $\leq$ peso($T''$), pues $T'$ es un AGM de $G$. Entonces, también
+		podemos concluir que peso($S'$) $=$ peso($T' + \{e\}$) $\leq$ peso($T''+\{e\}$) $=$ peso($S_{opt}$).
+		Entonces, peso($T'' + \{e\}$) $=$ peso($S_{opt}$) = peso($S'$) $=$ peso($ T' + \{e\}$) donde $T'$ es un
+		AGM de $G$ y $T''$ un AG de $G$. Pero como peso($e$) $=$ peso($e$), tiene que valer también que
+		peso($T'$) $=$ peso($T''$). Pero entonces, como $S_{opt} = T'' + \{e\}$, $T''$ tiene que ser un AGM de
+		$G$. Por lo tanto, $S_{opt}$ seguro que contiene un AGM de $G$.
 		\end{proof}
   
   \item dado un grafo G, si tomo algún AGM de G entonces la longitud de la mínima 
@@ -204,9 +215,9 @@ Primero, vamos a demostrar dos lemas:
 		Luego, si $e_{k} \not\in T'$, como long($e_{k}$) $\leq$ long($e$) $<$ long($f$), $f$ no 
 		era la arista más chica de $G \backslash T'$ (Absurdo). Entonces, concluimos que 
 		peso($e$) $\geq$ peso($f$). Haciendo la misma demostración, pero con la hipótesis de que
-		peso($f$) $<$ peso ($e$) obtendríamos exactamente la desigualdad opuesta. 
-		Entonces, concluimos que peso($e$) $=$ peso ($f$) siempre, lo cual implica que 
-		la longitud de la mínima arista de las que están en $G \backslash T$ tiene siempre de 
+		peso($f$) $<$ peso($e$) obtendríamos exactamente la desigualdad opuesta. 
+		Entonces, concluimos que peso($e$) $=$ peso($f$) siempre, lo cual implica que 
+		la longitud de la mínima arista de las que están en $G \backslash T$ tiene siempre de
 		la misma longitud, sin importar que AGM $T$ se elija.
 		\end{proof}
 \end{enumerate}
@@ -216,14 +227,19 @@ Entonces, para cualquier AGM $T$ que elijamos, la longitud del grafo $ G'' = T +
 también es siempre la misma, porque todos los AGM's de un grafo tienen que tener la misma
 longitud. Entonces, sea $G_{opt}$ la solución óptima del problema para el grafo $G$. 
 Por lo visto en el punto 1, $G_{opt}$ contiene un AGM de $G$. Supongamos que contiene 
-al AGM $T$. Entonces, como además sabemos que $G_{opt}$ tiene un único ciclo, seguro que
+al AGM $T$. Entonces, como además sabemos que $G_{opt}$ tiene un único ciclo (porque todas las 
+aristas del grafo $G$ tienen peso positivo. Entonces si $G_{opt}$ tuviera dos o más ciclos distintos,
+podríamos quitar un eje distinto de todos estos ciclos menos uno, y tendríamos una solución del problema 
+mejor que la óptima, pues habríamos quitado aristas de peso positivo y el grafo seguiría siendo conexo
+y con algún ciclo), seguro que
 $G_{opt} = T + \{e\}$ para algún eje $e$ que está en $G$ pero no en $T$. Pero para que 
 $G_{opt}$ sea de longitud mínima, la longitud de $e$ debe ser menor o igual que la 
 longitud de $f$ para cualquier eje $f \in G \backslash T$. Entonces, 
 $G_{opt} = T + \{e\}$ donde $T$ es algún AGM de $G$ y $e$ es un eje perteneciente a
 $G \backslash T$ y de longitud mínima en ese conjunto, y además la longitud de
 $G_{opt} = T + \{e\}$ es siempre la misma, independientemente del AGM $T$ que hayamos
-elegido. Esto es lo que queríamos demostrar.
+elegido. Entonces la solución óptima se puede conseguir a partir de algún AGM cualquiera de $G$
+y luego agregarle a ese AGM $T$ el eje de menor longitudo de los que quedaron en $G \backslash T$.
 \end{proof}
 
 \newpage
