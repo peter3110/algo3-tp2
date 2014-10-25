@@ -31,7 +31,7 @@ int minDistance(int dist[], bool sptSet[], int V)
  
 // Funtion that implements Dijkstra's single source shortest path algorithm
 // for a graph represented using adjacency matrix representation
-vector<int> dijkstra(vector< vector<int> > &graph, int src, int V)
+vector<int> dijkstra(vector< vector<int> > &graph, int src, int V, vector<int> &padres)
 {
      int dist[V];     // The output array.  dist[i] will hold the shortest
                       // distance from src to i
@@ -63,9 +63,11 @@ vector<int> dijkstra(vector< vector<int> > &graph, int src, int V)
          // u to v, and total weight of path from src to  v through u is
          // smaller than current value of dist[v]
          if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
-                                       && dist[u]+graph[u][v] < dist[v])
-            //dist[v] = dist[u] + graph[u][v];
-            dist[v] = min(dist[v], graph[u][v]);
+                                       && graph[u][v] < dist[v]) {
+
+			dist[v] = graph[u][v];
+			padres[v] = u;
+	     }
      }
      
      vector<int> res;

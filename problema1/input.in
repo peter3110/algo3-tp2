@@ -1,33 +1,9 @@
-salta bsas 3
-mendoza salta 1 14
-rosario salta 7 10
-bsas rosario 1 3
-
-bsas salta 3 
+bsas mendoza 8
 bsas salta 1 5
-salta tucuman 7 9
-tucuman salta 1 3
-
-bsas salta 2
-bsas rosario 1 5
-rosario salta 7 10
-
-bsas mendoza 5
-bsas rosario 1 5
-rosario salta 7 16
-rosario mendoza 7 8
-mendoza salta 10 12
-uruguay mendoza 1 15
-
-bsas salta 10
-bsas rosario 1 5
-bsas mendoza 1 15
-rosario salta 7 30
-rosario salta 7 30
-rosario mendoza 7 8
-mendoza tucuman 10 26
-mendoza tucuman 10 15
-tucuman salta 16 19
-tucuman misiones 17 19
-tucuman corrientes 17 19
-
+bsas rosario 1 9
+salta rosario 7 11
+rosario bsas 12 15
+rosario tucuman 12 17
+salta tucuman 7 15
+tucuman jujuy 17 19
+rosario mendoza 11 18

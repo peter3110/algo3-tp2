@@ -77,25 +77,44 @@ int main() {
   
   /* Resuelvo camino mínimo entre nodo ficticio y todos los demás */
   vector<int> dist;
-  dist = dijkstra(M, n, n+1);   // n+1 nodos y n es el nodo origen
+  vector<int> padres(n+1,0);
+  dist = dijkstra(M, n, n+1, padres);   // n+1 nodos y n es el nodo origen y en padres guardo el padre de cada nodo
   
   /* testeo */
   //~ escribirMatriz(M);
+  //~ for(int i=0; i<(int)dist.size(); i++) {cout << dist[i] << " ";}
+  //~ cout << endl;
   
-  for(int i=0; i<(int)dist.size(); i++) {cout << dist[i] << " ";}
-  cout << endl;
-  
-  /* Rastreo las combinaciones que hay que hacer */
+  /* Rastreo si hay solución, horario de llegada */
   int fin = INT_MAX;
+  int ultimo_vuelo = -1;
   for(int i=0; i<(int)dist.size()-1; i++) {
-      if(vuelos[i].origen == B) { fin = min(fin,dist[i]); }
+      if(vuelos[i].origen == B) { 
+			if(dist[i] < fin) {
+			    fin = dist[i];
+			    ultimo_vuelo = i;	
+		    }
+	  }
       if(vuelos[i].destino == B && dist[i] + 2 <= vuelos[i].inicio) {
-            fin = min(fin, vuelos[i].fin);
+            if(vuelos[i].fin < fin) {
+		        fin = vuelos[i].fin;
+		        ultimo_vuelo = i;
+		    }
       }  
   }
-  cout << "Llego a " << B << " a las " << fin << endl;
-  /* Devuelvo el resultado ( fin k v1 .. vk ) */
+  if(fin == INT_MAX) {cout << "no" << endl; return 0;}
   
+  /* Rastreo las combinaciones que hay que hacer */
+  vector<int> conexiones;
+  while(vuelos[ultimo_vuelo].origen != A) {
+	    conexiones.push_back(ultimo_vuelo);
+	    ultimo_vuelo = padres[ultimo_vuelo];
+  }
+  conexiones.push_back(ultimo_vuelo);
+  
+  /* Devuelvo el resultado ( fin k v1 .. vk ) */
+  cout << fin << " " << conexiones.size() << " ";
+  for(int i=(int)conexiones.size()-1; i>=0; i--) {cout << conexiones[i]+1 << " ";}cout << endl;
   
   return 0;
 }
