@@ -76,253 +76,85 @@ combinación. Además, en el segundo ejemplo el mejor horario en el que se puede
 llegar a ezeiza es en t = 12, tomando los vuelos 1 y 5. \\
 
 \subsection{Ideas desarrolladas para la resolución}
-Para resolver este problema, consideramos a cada vuelo como un nodo. En base a 
-las ciudades de origen y destino y horarios de salida y llegada de cada uno de
-los vuelos, utilizamos la técnica de programación dinámica para asignar a cada
-par de nodos una arista que los una si es que hay algún itinerario posible que 
-permita pasar por ambos vuelos. Así, generamos un grafo dirigido en el cual para 
-todo par de nodos A y B, hay una arista que los une si y sólo si se puede llegar 
-desde el nodo A al nodo B, pasando por algún subconjunto del resto de los nodos.
-Representamos este grafo dirigido como una matriz A de $nxn$ donde n es la cantidad
-de nodos y donde $A_{ij}$ es 1 si hay un camino que une al nodo i con el nodo j y
-0 si no. Esta matriz es llamada comúnmente la matriz de alcance de un digrafo. \\
-Entonces, primero veamos qué es lo que hace nuestro algoritmo en los primeros 4
-pasos, basándonos en el ejemplo 1: \\
+Como se explicó anteriormente, el problema consiste en detectar una secuencia de 
+combinaciones de vuelos óptima, de forma de llegar lo más temprano posible al destino $B$
+desde una localidad origen, $A$.
+Para resolver este problema, pensamos a cada vuelo como el nodo de un grafo dirigido.
+Cada par de nodos $u$ y $v$ se encuentra unido por una arista $e = (u,v)$ si y sólo si 
+es posible hacer combinación directa desde el vuelo $u$ al vuelo $v$. Para que esto sea 
+posible, la localidad destino del vuelo $u$ debe ser la misma que la localidad origen
+del vuelo $v$, y el horario de llegada del vuelo $u$ a su destino debe ser como máximo 
+\textbf{dos horas} antes del horario de salida del vuelo $v$ (de lo contrario, un pasajero
+no haría a tiempo para combinar el vuelo $u$ con el $v$. El peso de dicha arista $e$ será
+el horario de llegada del vuelo $u$ a su destino.
+Además, añadimos un nodo virtual, 
+$inicio$. Este nodo virtual va a estar unido mediante alguna arista $f = (inicio,u) $ con
+todos los vuelos $u$ cuyo origen sea la localidad $A$, y el peso de dicha arista $f$ será 
+el horario de salida del vuelo $u$. De esta manera, podremos hallar el horario mínimo de llegada
+desde el origen $A$ hasta cada uno de los vuelos que son accesibles desde alguno de los vuelos 
+que tiene como origen la localidad $A$.
 
-\[ \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 1 & 1 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 1 & 1 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 1 & 1 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 1 & 1 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right|
-\] 
+\par Luego, dado un camino P entre dos nodos (vuelos) $u$ y $v$, definimos su longitud como
+el máximo de los pesos de las aristas que conforman dicho camino (recordemos que el peso de cada
+arista representa el horario de llegada del último vuelo tomado al último destino al cuál se
+llegó, con lo cuál esta noción de distancia tiene sentido en relación al problema). 
+Supongamos que, considerando 
+esta métrica, calculamos el camino mínimo entre el nodo $inicio$ y cada uno del resto de los nodos.
+Entonces, este algoritmo nos va a decir cuál es el horario mínimo de llegada (si es que lo hay) 
+desde $inicio$ hasta cada uno de los vuelos disponibles. Entonces, consideremos el mínimo
+horario de llegada desde $A$ a los vuelos $v_{1} \dots v_{k}$, los cuáles todos tienen como destino la 
+localidad $B$. Entonces, el mínimo horario de llegada al destino $B$ será el mínimo de los horarios
+de llegada a $B$ de los vuelos del subconjunto de $v_{1} \dots v_{k}$ cuyos horarios de salida son 
+\textbf{por lo menos dos horas después} que el mínimo horario de llegada desde el nodo ficticio
+$inicio$ hasta cada uno de estos vuelos que tienen como destino a $B$.
 
-Se puede ver que en la primera matriz, hay un 1 en la posición $(i,j)$ sii se
-puede hacer conexión directa entre los vuelos $i$ y $j$. En el siguiente paso, 
-se actualiza la primera fila: desde el vuelo 1 puedo llegar a los vuelos que puedo
-llegar combinando de forma directa ó a los vuelos que puedo llegar combinando 
-pasando antes por un vuelo intermedio. En el ejemplo, paso del vuelo 1 al vuelo 2 
-y luego, del vuelo 2 puedo pasar al vuelo 4. En los pasos siguientes la matriz
-permanece inalterada porque los vuelos 3, 4 y 5 van directo a ezeiza, y no hay
-ningún vuelo que salga de allí. Como ya analizamos para todo par de vuelos si era
-posible llegar de uno al otro, miramos la matriz que nos quedó. Mirándola con
-atención, se puede calcular, para cualquier par de ciudades, si es posible llegar
-de una a la otra y, si lo es, en que horario. \\
-Veamos ahora con el ejemplo 2: \\
+\par Aquí hay que notar que si el cálculo del horario de llegada mínimo a
+alguno de estos vuelos lo hubieramos calculado mal (por ejemplo diciendo que el horario mínimo de
+llegada al vuelo $v_{j}$ es 10 cuando en realidad es 5), entonces si el horario de salida de dicho vuelo
+fuera a las 8, estaríamos desechando (equivocadamente) la posibilidad de llegar al destino $B$ en el 
+horario de llegada del vuelo $v_{j}$, lo cuál seguramente haría que nuestra solución al problema
+sea errónea.
 
-\[ \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  1 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  1 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  1 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  1 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right| ->
-  %
-  \left| \begin{array}{ccccc}
-  0 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  1 & 1 & 0 & 0 & 1 \\
-  0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 0 \end{array} \right|
-\] 
+\par A continuación exponemos las etapas inicial y final correspondientes al \texttt{Ejemplo de 
+instancia 2} 
 
-En este ejemplo, a diferencia de lo que sucede en el primero, en la posición 
-$(2,4)$ no hay un 1, pues no se puede combinar de forma directa a los vuelos
-rosario-catamarca con catamarca-ezeiza, por un tema de horarios de salida-llegada.
-En este caso, la posición $(1,3)$ es igual a 1, porque se puede conectar de forma
-directa a los vuelos catamarca-bragado y bragado-rosario. En el primer paso no se
-puede agregar ninguna combinación para el vuelo 1, porque los vuelos 2 y 5 llegan
-ambos a ezeiza, y no hay ningún vuelo que salga de allí. En el siguiente paso, como
-el vuelo 2 llega a ezeiza, no se puede hacer nada por la misma razón. En el tercer 
-paso, se puede añadir las combinaciones entre los vuelos 3-1 y 3-5, pues el vuelo 3
-llega a bragado y de bragado salen dos vuelos: el 1 y el 5. Por la misma razón
-que no se pudo hacer nada para el vuelo 2, tampoco se puede hacer nada para los vuelos
-4 y 5 y en los dos últimos pasos. A continuación, introducimos un 
-pseudocódigo del algoritmo que utilizamos. \\
-
-\begin{algorithm}[H]
-\SetKwInOut{Input}{input}
-\SetKwInOut{Output}{output}
-  \Input{ciudad A origen, ciudad B destino, tamaño de lista de vuelos $n$ y lista 
-         de vuelos donde cada vuelos es una tupla$<$orig,destino,salida,llegada$>$}
-  \Output{horario minimo de llegada, cantidad de vuelos necesarios,
-          posible itinerario de vuelos para lograr llegar en el horario mínimo}
-  \BlankLine
-  Vector puedoLlegar(n); \emph{guardo desde qué vuelos se puede llegar al destino B} \\
-  Matriz combinaciones(n,n); \emph{guardo desde qué vuelos se puede llegar a cada vuelo}\\
-  \BlankLine
-  \emph{Armo la matriz inicial: para cada vuelo anoto con cuales puede combinar
-        de forma directa. Notación: e(j) es un vector de tamaño $n$ con todos ceros
-        a excepción de la j-ésima posición, en la que tiene un 1.} \\
-  \For{$i$ $\leftarrow$ 0 to $n-1$}{ 
-	\For{$j$ $\leftarrow$ 0 to $n-1$}{
-		\If{horarioBien ($V_{i}$, $V_{j}$) and ciudadBien($V_{i}$, $V_{j}$)} { 
-			\emph{Hay vuelo directo de $V_{i}$ a $V_{j}$. Entonces, actualizo la matriz
-			Combinaciones poniendo un 1 en el j-ésimo lugar de la fila i. Observar que
-			Combinaciones[i] es un vector de tamaño n.} \\
-				Combinaciones[i] = Combinaciones[i] OR e(j); \\
-			\emph{Además, si en el i-ésimo lugar de PuedoLlegar hay un 1, pongo un 1 en el 
-			j-ésimo lugar de PuedoLlegar, pues ahora también puedo llegar al destino B desde 
-			el vuelo j (haciendo combinación con el vuelo i). } \\
-			\If{(PuedoLlegar AND e(i)) = 1} {
-				PuedoLlegar = PuedoLlegar OR e(j); \\
-			}
-		}
-	}
-  }
-  \BlankLine
-  \emph{Armo la matriz de alcance: para cada vuelo, a qué vuelos puede llegar y al mismo tiempo
-        voy actualizando desde qué vuelos puedo llegar al destino B.} \\
-  \For{$i$ $\leftarrow$ 0 to $n-1$}{ 
-	\For{$j$ $\leftarrow$ 0 to $n-1$}{
-		\emph{Si existe un itinerario que me permita llegar al vuelo j desde el vuelo i
-			  actualizo la matriz Combinaciones pues ahora 
-			  desde el vuelo i también se va a poder llegar a los vuelos a los cuales
-			  sólo se podía llegar desde el vuelo j} \\
-		\If{(Combinaciones[i] AND e(j)) = 1} {
-			Combinaciones[i] = Combinaciones[i] OR Combinaciones[j]; \\
-		}
-		\emph{Si desde el vuelo j se podía llegar al destino B, entonces ahora también
-		      se va a poder llegar al destino B desde el vuelo i. Actualizo el vector 
-		      PuedoLlegar.} \\
-		\If{(PuedoLlegar AND e(j)) = 1} {
-			PuedoLlegar = PuedoLlegar OR e(i); \\
-		}
-	}
-  }
-  resultado = traceBack(Combinaciones, PuedoLlegar,destino B); \\
-  return resultado;
-
-\caption{Pseudocódigo para el algoritmo empleado en la resolución}
-\end{algorithm}
-
-Entonces, como se ve en los ejemplos de más arriba, lo que hace nuestro algoritmo
-es ir vuelo por vuelo, actualizando para cada uno los vuelos, a cuáles puede
-ir y desde cuáles se puede llegar. Al terminar de actualizar el último vuelo,
-en la fila $i$ de nuestra matriz va a formar un vector $v_{i}$, que en la posición
-$j$ va a tener un 1 si y sólo si hay un posible itinerario de vuelos que permite
-llegar desde el vuelo $i$ al vuelo $j$. \\
-
-Ahora, pasamos a describir el algoritmo $traceBack$ que hace el traceback para definir exactamente
-qué combinación de vuelos hacer, a partir de la matriz final Combinaciones y del vector 
-PuedoLlegar. \\
-
-\begin{algorithm}[H]
-\SetKwInOut{Input}{input}
-\SetKwInOut{Output}{output}
-  \Input{Matriz Combinaciones, vector PuedoLlegar, ciudad B destino}
-  \Output{horario minimo de llegada, cantidad de vuelos necesarios,
-          posible itinerario de vuelos para lograr llegar en el horario mínimo}
-  vector resultado(0); \\
-  horarioLlegada = INF; \\
-  ultimo = INF; \\
-  \For{$i$ $\leftarrow$ 0 to $n-1$}{
-		\If{(PuedoLlegar AND e(i)) = 1 AND destino($V_{i}$) = B AND 
-		    fin($V_{i}$) $<$ horarioLlegada} {
-			horarioLlegada = fin($V_{i}$); \\
-			ultimo = i; \\
-		}
-  }
-  \If{horarioLlegada = INF} {
-		return "no"; \\
-  }
-  \BlankLine 
-  \emph{Si hay un posible itinerario para llegar desde A a B, lo construyo.} \\
-  Agregar(resultado, horarioLlegada); \\
-  vector temp; \\
-  vector usados(n, 0); \\
-   %\lElse {
-        Agregar(temp, ultimo); \\
-		\While{origen($V_{ultimo}$) $\neq$ B}{
-			 \For{$i$ $\leftarrow$ 0 to $n-1$}{
-				 \If{destino($V_{i}$) = origen($V_{ultimo}$) AND \\
-				     (puedoLlegar AND $e(i)$) = 1 AND usados[i] = 0}{
-					 ultimo = i; \\
-					 usados[i] = 1; \\
-					 Agregar(temp, ultimo); \\
-					 break; \\
-				  }  
-			 }
-		}
-  %}
-  Agregar(resultado, tam(temp)); \\
-  UnirVectores(resultado, temp); \\
-  return resultado; \\
-
-\caption{Pseudocódigo para el algoritmo empleado para hallar explícitamente 
-         qué secuencia de vuelos pueden ser tomados para llegar a destino
-         en el mínimo horario posible.}
-\end{algorithm}
 
 \subsection{Justificación de cota de complejidad}
-Para poder cumplir con la complejidad requerida, que es de $O(n^2)$, representamos
-la matriz de la cuál hablamos en la sección anterior como un vector de enteros.
-De esta forma, podemos actualizar una fila entera de la matriz en $O(1)$, mediante 
-operaciones como OR y AND. \\
-Ahora, analizaremos la complejidad de los algoritmos 1 y 2 detallados en la sección anterior: \\
-El algoritmo 1 se puede ver que la complejidad es $O(n^2)$ pues consta de dos doble ciclos que
-recorren desde $i = 0$ hasta $i = n-1$. \\
-Para el algoritmo 2, el análisis que hay que hacer es más fino: en la primera parte, tenemos un
-$for$ que recorre desde $i = 0$ hasta $i = n-1$, con lo cual ahí tenemos una complejidad de $O(n)$.
-Al terminar este $for$, tenemos también un doble ciclo, pero esta vez un $for$ adentro de un $while$.
-Cuando se entra al $while$, el vector resultado tiene un único elemento: el índice de un último 
-vuelo posible de algún posible itinerario (que seguro existe) para llegar desde A hasta B.
-Veamos que no se entra al cuerpo del $while$ más de $n$ veces: tras la finalización de cada
-iteración del $while$, el último elemento del vector resultado es el número de algún vuelo desde el 
-cuál se puede llegar al destino B y no es uno de los vuelos que ya agregamos al vector resultado.
-Entonces, como sabemos que efectivamente hay una solución, y en cada iteración del $while$ agregamos 
-al menos un nuevo vuelo a la solución, cuando hayamos agregado $n$ vuelos a la solución, el destino
-de ese n-ésimo vuelo seguro será B. Luego, no se entra al cuerpo del $while$ más de $n$ veces. \\
-Entonces, la complejidad del algoritmo 2 también es $O(n^2)$, con lo cual la complejidad del 
-algoritmo completo es de $O(n^2)$. \\
+Para resolver el problema, una vez que construimos el grafo del cuál hablamos en la sección anterior,
+empleamos una leve modificación del algoritmo de Dijkstra para hallar el camino mínimo entre cierto
+nodo, $inicio$ y el resto de los nodos bajo una nueva métrica, en la cual la distancia de un camino
+entre dos nodos $u$ y $v$ no viene dada por la suma del valor de los ejes que lo conforman sino por
+el valor del máximo de los ejes que lo conforman. La única línea que cambiamos del clásico algoritmo
+es la ???. Se puede observar que la complejidad del algoritmo no se ve modificada en absoluto. Luego,
+la complejidad de Dijkstra en nuestro problema es $O(n?)$.
+
+\begin{algorithm}[H]
+\SetKwInOut{Input}{input}
+\SetKwInOut{Output}{output}
+  \Input{grafo G, nodo src, int V (cantidad de nodos)}
+  \Output{vector$<$int$>$ dist : un vector con la distancia del camino mínimo entre src y el nodo i
+           en dist[i]}
+           int dist[V] (dist[i] guarda la distancia mínima entre src y el nodo i)\\
+           bool sptSet[V] (sptSet[i]=1 si ya encontramos el camino mínimo entre src y el nodo i) \\
+           dist[src] = 0 \\
+           \For{int count = 0; count $<$V-1; count++}{
+               int u = vértice que esta a menor distancia, del conjunto de vértices que todavía
+                       no visitamos \\
+               sptSet[u] = true (marcamos como visitado al vértice u) \\
+               \For{int v=0; v$<$V; v++}{
+                   \If{!sptSet[v] AND graph[u][v] AND dist[u] $\neq$ INT-MAX AND 
+                                                     graph[u][v] $<$ dist[v]}{
+                        dist[v] = graph[u][v] \\
+                        padres[v] = u \\
+                   }
+               }
+           }
+   return dist \\
+\caption{Dijkstra}
+\end{algorithm}
+
+\par Además, esta modificación en el algoritmo no afecta a la correctitud del algoritmo, puesto
+que en la demostración de correctitud de Dijkstra no se ahce alusión a...
 
 \subsection{Testeos de complejidad}
 
