@@ -23,14 +23,14 @@ bool cmpEquipos(pair< pair<int, int>, int > A, pair< pair<int, int>, int > B);
 void BuscarEjeParaCicloYAgregar(vector< pair< pair<int, int>, int > > &G,
                                 vector< pair< pair<int, int>, int > > &T);
 vector<nodo> BuscarCiclo(vector< pair< pair<int, int>, int > > &T, int n);
-void DevolverResultado(pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > &ANS);
+void DevolverResultado(pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > &ANS, int &costo);
 bool Chequear_Conexo(vector< pair< pair<int, int>, int > > &G, int n);
 vector<nodo> generar_grafo_nodos(vector< pair< pair<int, int>, int > > &G, int n);  
 void dfs(nodo base, vector<int> &visitados, vector<nodo> &G2);                
 nodo dfsCiclo(nodo base, vector<int> &visitados, vector<nodo> &G2, vector<int> &padres);       
-pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > BuscarCicloYResto(vector< pair< pair<int, int>, int > > &T, int n);                      
+pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > BuscarCicloYResto(vector< pair< pair<int, int>, int > > &T, int n, int &costo);                      
 vector< vector<int> > matrizDeAdyacencia(vector< pair< pair<int, int>, int > > &G, int n);
-// vector< pair< pair<int, int>, int > > MST(vector< pair< pair<int, int>, int > > &G, int n);
+bool noEstaEnCiclo(pair< pair<int, int>, int > x, vector< pair< pair<int, int>, int > > C);
 
 /*========== Resolvedor del problema ==========*/
 int main() {
@@ -47,20 +47,15 @@ int main() {
   
   read(n, m, G);
   
-  /* Chequear que el grafo G sea conexo */
+  /* Chequear que el grafo G sea conexo y que al menos haya un ciclo en G */
   
   if(!Chequear_Conexo(G, n)) {cout << "no" << endl; return 0;};
+  if((int)G.size() == n-1) {cout << "no" << endl; return 0;}
   
   /* Armo el MST a partir del grafo G */
   
   vector< vector<int> > G2 = matrizDeAdyacencia(G,n);
   T = primm(G2,n);
-  
-  
-  //~ T = G;
-  //~ G.push_back(make_pair(make_pair(2,3),5));
-  //~ G.push_back(make_pair(make_pair(4,8),10));
-  //~ G.push_back(make_pair(make_pair(2,7),2));
   
   /* Ordeno los ejes de G  y de T de menor a mayor costo, para luego localizar 
    * el menor eje de G que no esta en T y agregarlo a T para formar un ciclo */
@@ -70,12 +65,13 @@ int main() {
   
   vector< pair< pair<int, int>, int > > T2 = T;
   BuscarEjeParaCicloYAgregar(G,T2);		// G y T tienen que estar indexado entre 1..n; tam(T2) = n+2
-										
-  pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > ANS = BuscarCicloYResto(T2,n);
+  
+  int costo = 0;									
+  pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > ANS = BuscarCicloYResto(T2,n,costo);
   
   /* Devolver resultado */
   
-  DevolverResultado(ANS);
+  DevolverResultado(ANS,costo);
   
   return 0;
 }
@@ -184,28 +180,23 @@ nodo dfsCiclo(nodo base, vector<int> &visitados, vector<nodo> &G2, vector<int> &
 	  
 	  nodo temp;
       padres[base.adyacentes[i].first] = base.valor;
-      //~ cout << base.valor << " es el padre de " << base.adyacentes[i] << endl;
       if(visitados[base.adyacentes[i].first] < 2) {
 	      temp = dfsCiclo(G2[base.adyacentes[i].first],visitados, G2,padres);
 	      if(visitados[temp.valor]==2) {return temp;}
 	  }
   }
-  nodo aux; aux.valor = -15;
+  nodo aux; aux.valor = -15;	// nunca debería devolver esto
   return aux;
 } 
 
-pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > BuscarCicloYResto(vector< pair< pair<int, int>, int > > &T, int n) {
+pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > BuscarCicloYResto(vector< pair< pair<int, int>, int > > &T, int n, int &costo) {
   
   vector<int> visitados(n+2,0);		// tam(T) = n+2: un arbol con un ciclo
   vector<int> padres(n+2,0);
   vector<nodo> resTemp;				// guardo los nodos pertenecientes al ciclo
   vector<nodo> T2 = generar_grafo_nodos(T,n);
-  
   nodo nodox = dfsCiclo(T2[1],visitados,T2,padres);
   
-  //~ cout << "procesé bien al ciclo. Devuelvo el nodo: " << nodox.valor << endl;
-  //~ for(int i=1; i<(int)padres.size(); i++) {cout << visitados[i] << " ";}cout << endl;
-  //~ for(int i=1; i<(int)padres.size(); i++) {cout << padres[i] << " ";}cout << endl;
   resTemp.push_back(nodox);
   int padre = padres[nodox.valor];
   while(padre != nodox.valor) {
@@ -226,7 +217,7 @@ pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int >
 	      if(padres[resTemp[i].valor] == nodox.valor && 
 	         ((T[j].first.first == nodox.valor && T[j].first.second == resTemp[i].valor) || 
 	          (T[j].first.first == resTemp[i].valor && T[j].first.second == nodox.valor))){
-			  ciclo.push_back(T[j]);	  
+			  estan[j] = 1;
 		  }
 	  }
   }
@@ -234,22 +225,22 @@ pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int >
   for(int i=0; i<(int)T.size(); i++) {
 	  if(estan[i] == 1) {
 		  ciclo.push_back(T[i]);
+		  costo += T[i].second;
 	  }else {
 	      resto.push_back(T[i]);
+	      costo += T[i].second;
 	  }  
   }
   
   return make_pair(ciclo,resto);
 }
 
-
-void DevolverResultado(pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > &ANS) {
+void DevolverResultado(pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int > > > &ANS, int &costo) {
   
-  cout << "EL CICLO ES: " << endl;
+  cout << costo << " " << ANS.first.size() << " " << ANS.second.size() << endl;
   for(int i=0; i<(int)ANS.first.size(); i++) {
 	  cout << ANS.first[i].first.first << " " << ANS.first[i].first.second << " " << ANS.first[i].second << endl;  
   }
-  cout << "EL RESTO ES: " << endl;
   for(int i=0; i<(int)ANS.second.size(); i++) {
 	  cout << ANS.second[i].first.first << " " << ANS.second[i].first.second << " " << ANS.second[i].second << endl;  
   }

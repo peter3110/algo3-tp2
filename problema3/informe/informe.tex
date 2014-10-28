@@ -28,7 +28,7 @@ conexiones y de equipos (que funcionarán como servidores) tales que:
   \item Todo equipo debe quedar conectado al anillo de servidores vía un 
         enlace directo o pasando a través de otros equipos en el medio
   \item La suma total de los costos de todos los enlaces utilizados debe
-        ser lomínimo posible
+        ser lo mínima posible
   \item El algoritmo debe tener una complejidad estrictamente mejor que $O(n^3)$
   \item El algoritmo debe detectar los casos en los que no haya solución
 \end{enumerate}
@@ -38,7 +38,7 @@ contiene un entero positivo $n$ que indica la cantidad de equipos de la red
 (numerados de 1 a $n$), y un entero no negativo $m$ que corresponde a la 
 cantidad de enlaces disponibles. A esta línea le siguen $m$ líneas, una para
 cada enlace, con el formato \texttt{e1 e2 c} donde \texttt{e1} y \texttt{e2}
-representan los equipos en lso extremos del enlace en cuestión (ambos enteros
+representan los equipos en los extremos del enlace en cuestión (ambos enteros
 entre 1 y $n$) y \texttt{c} es el costo por utilizar dicho enlace. En caso de
 haber solución, la salida tiene el formato \texttt{C Ea Er} donde \texttt{C} es
 el csoto de la solución dada y \texttt{Ea} y \texttt{Er} son los enlaces 
@@ -68,15 +68,15 @@ continuación, mostramos un ejemplo de una posible instancia.
 \hfill
 \begin{minipage}[t]{0.4\textwidth}
 \begin{Verbatim}[frame=single,framesep=1cm,label= Ejemplo de salida: instancia 1]
-20 3 5
-2 6
-6 7
-2 7
-1 2
-7 5
-3 5
-5 4
-5 8
+17 3 5
+2 6 1
+6 7 1
+2 7 2
+1 2 1
+5 4 2
+5 8 2
+7 5 3
+2 3 5
 \end{Verbatim}
 \end{minipage}
 
@@ -92,7 +92,9 @@ conexiones requeridos por el problema
 \includegraphics[scale=1]{imagenes/equipos3.png}
 \includegraphics[scale=1]{imagenes/equipos4.png}
 \includegraphics[scale=1]{imagenes/equipos5.png}
-\caption{Soluciones de costo C = 20 (rojo), C = 24 (azul), C = 25 (marrón) respectivamente}
+\includegraphics[scale=1]{imagenes/equipos7.png}
+\caption{Soluciones de costo C = 20 (rojo), C = 24 (azul), C = 25 (marrón)
+         C = 17 (azul oscuro) respectivamente}
 \end{figure}
 
 Se puede observar que las tres soluciones presentadas en la figura 1.1.2 
@@ -100,14 +102,14 @@ son efectivamente soluciones porque todas presentan algún circuito de
 servidores, y en todos los casos, todas las computadoras de la red están 
 conectadas con los servidores con conexiones directas o a través de conexiones
 con otros equipos. Sin embargo, no todas estas soluciones son óptimas: una 
-tiene costo 20, otra 24 y otra 25. Es decir, que para este caso en particular,
+tiene costo 20, otra 24 otra 25 y otra 17. Es decir, que para este caso en particular,
 nuestro algoritmo debería devolver como solución los servidores 2, 6, 7 y
-los enlaces que están marcados en rojo en la figura 1.1.2.
+los enlaces que están marcados en azul oscuro en la figura 1.1.2.
 
 \subsection{Ideas desarrolladas para la resolución}
 A partir del ejemplo presentado en la sección anterior y de algunos otros,
 observamos que en todos los casos, todos los enlaces que conformaban el 
-árbol generador mínimo (AGM) del grafo generados por nuestra red de equipos
+árbol generador mínimo (AGM) del grafo generado por nuestra red de equipos
 estaban incluidos en la solución óptima del problema. En nuestro ejemplo,
 el AGM sería:
 
@@ -120,12 +122,12 @@ el AGM sería:
 Entonces, pensamos que posiblemente esto siempre sucediera, al menos siempre
 que existiera alguna solución. Así es que,
 intentamos probar que tomando el AGM del grafo en cuestión y luego 
-agregándole la arista de menor pero de las que no estuvieran incluidas
+agregándole la arista de menor peso de las que no estuvieran incluidas
 en el AGM, el grafo generado sería una solución (sería un grafo con algún 
 ciclo y todos los nodos estarían conectados con algún nodo del conjunto de 
 nodos que conformaban el ciclo en el grafo) y que sería óptima (la suma
-total de los pesos de los enlaces sería lo mínimo posible). La demostración
-está más adelante. \\
+total de los pesos de los enlaces sería lo mínima posible). La demostración
+de que esto es así esta en la sección en la que demostramos correctitud. \\
 Entonces, a continuación describimos los pasos que nuestro algoritmo
 efectuará para resolver el problema planteado:
 
@@ -136,7 +138,9 @@ efectuará para resolver el problema planteado:
   \item chequear si el grafo $G$ es conexo. Si no lo es, entonces el problema
         no tendrá solución
   \item si el grafo $G$ es conexo, generar el árbol generador mínimo $T$ del grafo
-        $G$
+        $G$ y chequear que este AGM no consuma todas las aristas del grafo $G$ (de
+        lo contrario, no quedaría ninguna arista libre para agregar a $T$ y formar
+        el ciclo que queremos y no habría solución).
   \item buscar el menor de los enlaces que aparece en el grafo $G$ pero que no 
         aparece en el árbol generador mínimo $T$. Llamemos a ese eje $e$.
   \item agregamos el eje $e$ al AGM $T$. Queda así formado el grafo $G' = T + e$,
@@ -149,7 +153,6 @@ efectuará para resolver el problema planteado:
         
 \end{enumerate}
 
-\newpage
 \subsection{Demostración de Correctitud}
 Para demostrar la correctitud de nuestro algoritmo, tenemos que demostrar que los
 pasos descriptos en la sección anterior para la resolución del problema 
@@ -158,8 +161,12 @@ repasando las ideas ya expuestas, lo que planteamos es que se puede llegar a una
 solución óptima a partir de generar el AGM $T$ de nuestro grafo $G$ y luego generar
 el grafo $G' = T + \{e\}$, donde $e$ es el eje de menor costo que esta en $G$ y
 no en $T$. Pero lo que nos pide el enunciado es que generemos, a partir del grafo $G$,
-otro grafo $G''$ tal que $G''$ sea conexo, contenga un único ciclo y que la suma
-total de los costos de sus ejes sea lo mínima posible. Entonces, demostrando la 
+otro grafo $G''$ tal que $G''$ sea conexo, que la suma
+total de los costos de sus ejes sea lo mínima posible y que contenga un único ciclo 
+(ya que si tuviera 
+más de un ciclo, como todos los ejes son de peso positivo, podríamos quitar los ejes 
+necesarios para que sólo quede un único ciclo y lograríamos así cumplir los requisitos
+del problema, pero consiguiendo un costo total menor). Entonces, demostrando la 
 siguiente proposición, estaríamos demostrando nuestro método empleado para la resolución
 es efectivamente correcto:
 
@@ -167,7 +174,7 @@ es efectivamente correcto:
 \begin{prop}
 Dado un grafo G conexo, con T un AGM de G y S el conjunto de todos los árboles
 generadores de G y $e$ el mínimo eje perteneciente a $G \backslash T$ vale que: 
-$costo(T+e) = \min\limits_{\substack{f \in G \backslash T \\ T' \in S}} costo(T'+f)$
+$costo(T+e) = \min\limits_{\substack{T' \in S \\ f \in G \backslash T'}} costo(T'+f)$
 \end{prop}
 \begin{proof}[Demostración de la Proposición 1] 
 Primero, vamos a demostrar dos lemas: 
@@ -177,8 +184,8 @@ Primero, vamos a demostrar dos lemas:
 		
 		\begin{proof}[Demo de 1]
 		Sea $S_{opt}$ una solución óptima para el probelma. Entonces, $S_{opt}$ tiene un único ciclo
-		porque si tuviera más de uno, como todos los ejes son de peso positivo, podríamos quitar un
-		eje de todos menos uno de esos ciclos, y quedaría una solución $S'_{opt}$ mejor que $S_{opt}$.
+		porque si tuviera más de uno, como todos los ejes son de peso positivo, podríamos quitar
+		los ejes necesarios para que quede un único ciclo, y quedaría una solución $S'_{opt}$ mejor que $S_{opt}$.
 		Consideremos una solución óptima: $S_{opt} = T + \{k\}$ donde $T$ es algún árbol que visita 
 		todos los nodos de $G$. Y por otro lado consideremos un AGM de $G$: $T'$. Seguro que en el ciclo
 		que se forma en $S_{opt}$ hay algún eje $e$ tal que $e \not\in T'$ puesto que $T'$ es un árbol y 
@@ -206,7 +213,7 @@ Primero, vamos a demostrar dos lemas:
 		tienen la misma cantidad de aristas y $e \in T'$ pues de lo contrario $e$ sería el mínimo
 		eje perteneciente a $G \backslash T'$ y no $f$.\\
 		Ahora, supongamos que formamos el grafo 
-		$H = T + \{e\}$. Se forma un ciclo: $e_{1}, e_{2} \dots e_{1}$, donde long($e$) $\geq$ 
+		$H = T + \{e\}$. Se forma un ciclo: $e, e_{1}, e_{2} \dots e$, donde long($e$) $\geq$ 
 		long($e_{i}$) (puesto que de lo contrario, podríamos obtener el árbol $T + \{e\} - \{e_{i}\}$, de 
 		longitud menor que T) y además, \textbf{no todos} 
 		los ejes $e_{i}$ están incluidos en $T'$, puesto que por hipótesis, $e \in T'$ y entonces
@@ -228,7 +235,7 @@ también es siempre la misma, porque todos los AGM's de un grafo tienen que tene
 longitud. Entonces, sea $G_{opt}$ la solución óptima del problema para el grafo $G$. 
 Por lo visto en el punto 1, $G_{opt}$ contiene un AGM de $G$. Supongamos que contiene 
 al AGM $T$. Entonces, como además sabemos que $G_{opt}$ tiene un único ciclo (porque todas las 
-aristas del grafo $G$ tienen peso positivo. Entonces si $G_{opt}$ tuviera dos o más ciclos distintos,
+aristas del grafo $G$ tienen peso positivo, si $G_{opt}$ tuviera dos o más ciclos distintos,
 podríamos quitar un eje distinto de todos estos ciclos menos uno, y tendríamos una solución del problema 
 mejor que la óptima, pues habríamos quitado aristas de peso positivo y el grafo seguiría siendo conexo
 y con algún ciclo), seguro que
@@ -244,14 +251,114 @@ y luego agregarle a ese AGM $T$ el eje de menor longitudo de los que quedaron en
 
 \newpage
 \subsection{Justificación de cota de complejidad}
+Ahora, nos resta es demostrar que nuestro algoritmo respeta, en efecto, la cota
+de complejidad requerida en el enunciado. Se exige que la cota sea menor a $O(n^3)$.
+
+Una vez que tenemos el grafo $G$ del problema, lo primero que debemos hacer es chequear que $G$
+sea conexo. Si no fuera conexo, entonces de seguro que no existiría ningún conjunto de aristas
+incluido en $E(G)$ que conecte a todos los nodos de $G$, formandose algún ciclo, y de costo 
+mínimo. Para hacer este chequeo, llamamos a la función $ChequearConexo(G,n)$ que recibe un grafo
+y la cantidad de nodos del grafo. Si no fuera conexo, entonces terminamos el programa, indicando
+que no hay solución. A continuación, podría suceder que $G$ fuera conexo, pero que no existiera
+ningún ciclo en $G$. Si este fuera el caso, claramente tampoco no habría solución al problema,
+porque no seríamos capaces de detectar ningún ciclo para nuestro anillo de servidores, y también
+tendríamos que finalizar el programa, indicando que no hay solución. Para 
+chequear que esto no suceda, una vez que nos aseguramos que $G$ fuera conexo, chequeamos que
+la cantidad de ejes de $G$ sea al menos igual a la cantidad de nodos de $G$, en cuyo caso podemos
+estar seguros de que al menos habrá algún ciclo en $G$ y entonces existirá al menos una solución
+para el problema. A continuación, llamamos a la función $primm$, que utilizando el algoritmo de
+primm busca algún AGM en $G$, que lo llamamos $T$. Luego, ordenamos los ejes de $T$ y de $G$ de
+menor a mayor, para hacer una búsqueda en tiempo eficiente de la mínima arista que está en $G$
+y no en $T$, con la función $BuscarEjeParaCicloYAgregar(G,T)$, que agrega dicha arista al 
+árbol $T$. Finalmente, llamamos a la función $BuscarCicloYResto(T)$, que dado un grafo $T$ que 
+sabemos es una solución para nuestro problema, se ocupa de rastrear el conjunto de aristas que 
+forma el ciclo y el conjunto del resto de las aristas. \\
+Lo que haremos a continuación, es demostrar que todas las funciones que acabamos de especificar
+en efecto tienen un orden de complejidad menor que $O(n^3)$, lo cual implicaría que nuestro
+algoritmo tiene, en efecto, un orden de complejidad menor que $O(n^3)$. \\
+Vamos por partes:
+\begin{enumerate}
+	\item $ChequearConexo$ hace es un DFS sobre el grafo G. Si al finalizar la 
+	      función DFS, quedó algún
+	      nodo sin recorrer, entonces concluimos que $G$ no es conexo. Como cada vez que 
+	      visitamos un nodo lo marcamos (y nos aseguramos de no visitarlo nunca más), nos 
+	      aseguramos de visitar una única vez cada nodo. Como $G$ tiene $n$ nodos, la 
+	      complejidad del algoritmo es $O(n)$.
+	\item $primm$: vimos en la teórica que la complejidad del algoritmo de primm es $O(ElogV)$.
+	      Si el grafo $G$ fuera completo (es decir, en el peor caso) y $|V| = n$, entonces 
+	      $|E| = n^2$. En ese caso, la complejidad del algoritmo sería $T(n) = O(n^2 log(n))$. 
+	\item $sort(T)$ y $sort(G)$, donde $G$ y $T$ son una lista de aristas (con sus respectivos pesos) 
+	      que representan al grafo original y a algún AGM de dicho grafo. 
+	      Luego, $|G| \leq n^2$ (si $G$ fuera completo) y $|T| \leq n$ (porque $T$ es un árbol).
+	      Para un arreglo de longitud $k$, la librería standard de C++ nos asegura que la 
+	      complejidad de la función $sort$ es $O(klog(k))$. Entonces, la complejidad de 
+	      $sort(T)$ es de $O(nlog(n))$ y la de $sort(G)$ es $O(n^2 log(n^2)) = O(n^2 2log(n)) = 
+	      O(n^2 log(n))$
+	\item $BuscarEjeParaCicloYAgregar(G,T)$ recorre en el peor caso dos vectores, uno de tamaño
+	      $n^2$ y otro de tamaño $n$, puesto que $G$ y $T$, son dos grafos representados como una lista 
+	      de aristas, ordenada según el peso
+          de cada arista de menor a mayor. $T$ es pasado por referencia, para poder agregarle
+          la arista correspondiente (la menor de las que están en $G$ y no en $T$). Luego, esta 
+          función tiene una complejidad de $O(n^2 + n) = O(n^2)$ en el peor caso.
+	\item en la función $BuscarCicloYResto(T)$ hacemos un llamado a la función $dfsCiclo$, que 
+	      hace es un DFS igual al de la función $dfs$ que llamamos cuando chequeamos
+	      si el grafo es conexo, pero levemente modificado para ir guardándonos el padre de cada uno
+	      de los nodos, para poder posteriormente recuperar todos los ejes pertencientes al ciclo. También 
+	      devuelve algún nodo del único ciclo que tiene $T$. Además, este DFS sólo lo hacemos
+	      para detectar un ciclo. Luego, es posible que no tengamos que recorrer todos los nodos
+	      del grafo. Aparte de esto, esta función cuenta con un $While$, que como máximo ejecuta $n$ veces,
+	      pues la cantidad máxima de nodos que puede tener un ciclo es $n$, y en cada iteración del ciclo,
+	      visitamos un nodo distinto. Por último, hay un doble $For$, que tiene una complejidad de
+	      $O(resTemp.size() * T.size())$, donde $resTemp$ es una lista con los nodos de un ciclo (con lo 
+	      cuál
+	      como máximo puede tener $n$ elementos) y $T$ es un árbol generador de $G$ con un eje agregado, 
+	      y está representado como una lista de ejes (con lo cuál como máximo puede tener $n$ elementos). 
+	      Luego,
+	      la complejidad de este doble $For$ es $O(n^2)$.
+	   
+\end{enumerate}
+
+Conclusión: la complejidad de nuestro algoritmo viene dada por la suma de las complejidades de cada
+una de las funciones mencionadas más arriba. Con lo cual, la complejidad de nuestro algoritmo es: 
+$ C(n) = O(n) + O(n^2 log(n)) + O(n^2 log(n)) + O(n^2) + O(n^2) = O(n^2 log(n))$. 
 
 \begin{algorithm}[H]
 \SetKwInOut{Input}{input}
 \SetKwInOut{Output}{output}
-  \Input{???}
-  \Output{??}
-
-\caption{Pseudocódigo para el algoritmo empleado en la resolución}
+  \Input{grafo $G$ donde cada nodo es un equipo y cada arista es una conexión entre equipos. 
+         Asumimos que $G$ es conexo y tiene al menos un ciclo y tiene exactamente $n$ aristas}
+  \Output{$<C,R>$, donde $C$ es un conjunto de aristas pertencientes a $E(G)$, que en 
+          particular forman un ciclo, y $R$ es un conjunto de aristas incluidas en $E(G)$.
+          $C$ y $R$ conectan a todos los nodos de $G$ y son el conjunto de aristas óptimo
+          para resolver el problema}
+          
+          vector$<$int$>$ visitados(n) \\
+          vector$<$int$>$ padres(n) \\
+          nodo nodox = dfsCiclo(T2[1],visitados,T2,padres) \\     
+          resTemp = vector donde guardo los nodos del ciclo C \\
+          int padre = padres[nodox.valor] (el padre del primer nodo que sé que pertenece al ciclo C)
+		  vector$<$int$>$ estan(n+1,0) (guardo los indices de los nodos que están en el ciclo) \\
+		  \While{padre $\neq$  nodox.valor}{
+				resTemp.pushback(T2[padre]); \\
+				padre = padres[T2[padre].valor]; \\
+		  }
+		  \For{i = 1 to resTemp.size()}{
+				\For{j = 1 to T.size()}{
+				    si el nodo i está en resTemp y en el árbol T, entonces está en el ciclo: estan[i] = 1
+				}
+		  }
+		  
+		  vector$<$ejes$>$ ciclo, resto
+		  \For{i = 1 to T.size()}{
+		      \eIf{estan[i]==1}{
+		          ciclo.pushback(T[i])
+		      }{
+		          resto.pushback(T[i]);
+		      }
+		  }
+		  return makepair(ciclo,resto);
+		  
+\caption{Algoritmo BuscarCicloYResto}
 \end{algorithm}
 
 \subsection{Testeos de complejidad}
