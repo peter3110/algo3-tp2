@@ -2,7 +2,7 @@
 \documentclass[11pt, a4paper, twoside]{article}
 \usepackage{header}
 \usepackage{config}
-\usepackage[lined, boxed, commentsnumbered]{algorithm2e}
+\usepackage[lined, boxed, linesnumbered, commentsnumbered]{algorithm2e}
 % -------------------------------------
 \begin{document}
 
@@ -116,7 +116,7 @@ horario de llegada del vuelo $v_{j}$, lo cuál seguramente haría que nuestra so
 sea errónea.
 
 \par A continuación exponemos las etapas inicial y final correspondientes al \texttt{Ejemplo de 
-instancia 2} 
+instancia 2}.
 
 
 \subsection{Justificación de cota de complejidad}
@@ -124,16 +124,25 @@ Para resolver el problema, una vez que construimos el grafo del cuál hablamos e
 empleamos una leve modificación del algoritmo de Dijkstra para hallar el camino mínimo entre cierto
 nodo, $inicio$ y el resto de los nodos bajo una nueva métrica, en la cual la distancia de un camino
 entre dos nodos $u$ y $v$ no viene dada por la suma del valor de los ejes que lo conforman sino por
-el valor del máximo de los ejes que lo conforman. La única línea que cambiamos del clásico algoritmo
-es la ???. Se puede observar que la complejidad del algoritmo no se ve modificada en absoluto. Luego,
-la complejidad de Dijkstra en nuestro problema es $O(n?)$.
+el valor del máximo de los ejes que lo conforman (que además siempre va a ser el último eje visitado
+del camino $P(u,v)$ en cuestión). Las únicas líneas que cambiamos del clásico algoritmo
+son las 8 y 9. En la 8, en lugar de pedir que $dist[u] + graph[u][v] < dist[v]$, pedimos simplemente
+que $graph[u][v] < dist[v]$ (porque según nuestra métrica, el camino $P(u,v)$ que tiene como último eje
+al eje $e=(u,v)$ tiene como longitud el valor del último eje recorrido).
+En la 9, en lugar de acumular en dist[v] el valor de la última arista visitada, asignamos
+a dist[v] el valor de dicha última arista. \\
+Se puede observar que esta modificación no afecta la complejidad del algoritmo puesto que los dos $For$
+anidados ejecutan la misma cantidad de veces, independientemente de cuál sea el valor de dist[v]. Y, 
+chequear cuál es el nodo del conjunto aún no visitado que está a menor distancia es $O(n)$ pues como
+máximo hay que visitar los $n$ nodos del grafo.
+Luego, la complejidad de Dijkstra en nuestro problema es $O(n^2)$, donde $n = |V|$.
 
 \begin{algorithm}[H]
 \SetKwInOut{Input}{input}
 \SetKwInOut{Output}{output}
   \Input{grafo G, nodo src, int V (cantidad de nodos)}
-  \Output{vector$<$int$>$ dist : un vector con la distancia del camino mínimo entre src y el nodo i
-           en dist[i]}
+  \Output{vector$<$int$>$ dist : un vector con el horario de llegada del camino mínimo entre src y 
+          el nodo i en dist[i]}
            int dist[V] (dist[i] guarda la distancia mínima entre src y el nodo i)\\
            bool sptSet[V] (sptSet[i]=1 si ya encontramos el camino mínimo entre src y el nodo i) \\
            dist[src] = 0 \\
@@ -154,7 +163,30 @@ la complejidad de Dijkstra en nuestro problema es $O(n?)$.
 \end{algorithm}
 
 \par Además, esta modificación en el algoritmo no afecta a la correctitud del algoritmo, puesto
-que en la demostración de correctitud de Dijkstra no se ahce alusión a...
+que ...
+
+\par Por otro lado, presentamos un pseudocódigo del algoritmo que programamos para la solución,
+a partir de la utilización del algoritmo de Dijkstra comentado recién. Los pasos que efectuamos 
+son: 
+\begin{enumerate}
+  \item leer la entrada, y guardar una lista con todos los vuelos disponibles
+  \item a partir de la lista de vuelos, armar un grafo dirigido, representado según una matriz de 
+        adyacencias. Como dijimos, cada nodo será un vuelo y el peso de cada arista $(u,v)$ será
+        el horario de llegada del vuelo $u$ a su destino
+  \item agregamos un nodo ficticio, $inicio$ al grafo, tal que esta unido por una arista con todos
+        los vuelos que tienen como origen la localidad $A$. A cada uno de estos ejes le ponemos como
+        pero el horario de salida de cada uno de los respectivos vuelos que quedan unidos a $inicio$.
+  \item corremos el algoritmo de Dijkstra sobre el grafo construido, para calcular el horario mínimo 
+        de llegada desde $inicio$ hasta cada uno de los vuelos. Obtenemos un vector de distancias.
+  \item a partir del vector de distancias obtenido, chequeamos, de todos los vuelos que son accesibles
+        desde A, cuál es el que llega más temprano a la localidad $B$. Entonces, decidimos que el horario
+        de llegada de ese vuelo (lo llamamos $j$) a $B$ será el mínimo posible.
+  \item Por último, a partir del vuelo $j$, vamos recorriendo los padres correspondientes a cada uno
+        de los vuelos con los que hubo que hacer combinación para llegar en el mínimo horario posible
+        al vuelo $j$, hasta llegar al nodo $inicio$. De esta forma, obtenemos todos los vuelos 
+        con los que se tuvo que hacer combinación para llegar en el horario óptimo a $B$.
+\end{enumerate}
+
 
 \subsection{Testeos de complejidad}
 

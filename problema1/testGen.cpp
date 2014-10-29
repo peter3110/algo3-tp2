@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   srand(time(NULL));
   ciudad1 = rand() % CANT_CIUDADES;
   ciudad2 = rand() % CANT_CIUDADES;
-  if (ciudad1 == ciudad2) {ciudad2--;}
+  if (ciudad1 == ciudad2) {ciudad2++;}
   cout << ciudades[ciudad1] << " " << ciudades[ciudad2] << " ";
   cout << CANT_VUELOS << endl;
   

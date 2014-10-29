@@ -70,7 +70,7 @@ int main() {
   /* Agrego nodo ficticio que va a ser el origen. ¿desde qué nodos (vuelos) puedo empezar? */
   vector<int> nodoFicticio(n+1,INT_MAX);
   for(int i=0; i<n; i++) {
-      if(vuelos[i].origen == A) { nodoFicticio[i] = vuelos[i].inicio; }  
+      if(vuelos[i].origen == A) { nodoFicticio[i] = vuelos[i].inicio - 2; }  
       if(i==n) { nodoFicticio[i] = 0; }
   }
   M.push_back(nodoFicticio);
