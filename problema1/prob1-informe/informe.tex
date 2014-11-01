@@ -90,9 +90,15 @@ el horario de llegada del vuelo $u$ a su destino.
 Además, añadimos un nodo virtual, 
 $inicio$. Este nodo virtual va a estar unido mediante alguna arista $f = (inicio,u) $ con
 todos los vuelos $u$ cuyo origen sea la localidad $A$, y el peso de dicha arista $f$ será 
-el horario de salida del vuelo $u$. De esta manera, podremos hallar el horario mínimo de llegada
+el horario de salida del vuelo $u$. De esta manera, querremos hallar el horario mínimo de llegada
 desde el origen $A$ hasta cada uno de los vuelos que son accesibles desde alguno de los vuelos 
-que tiene como origen la localidad $A$.
+que tiene como origen la localidad $A$ a partir de hallar el camino mínimo (con una noción 
+particular de qué es la longitud de un camino, ya que si por ejemplo consideramos tres nodos: $v_{1},
+v_{2}$ y $v_{3}$ tales que $v_{1} = <A,b,1,5>$ y $v_{2} = <b,c,10,15>$ y $v_{3} = <c,d,20,25>$, entonces
+$v_{1}$ y $v_{2}$ van a estar unidos por una arista de peso 5 y $v_{2}$ y $v_{3}$ por una arista de
+peso 15. En este caso, el horario de llegada desde la localidad $A$ hasta el vuelo $v_{3}$ es 15.
+Es decir, la longitud del camino $(v_{1},v_{2})(v_{2},v_{3})$ debería ser 15 y no 20=5+15)
+entre el origen ($inicio$) y cada uno de los vuelos.
 
 \par Luego, dado un camino P entre dos nodos (vuelos) $u$ y $v$, definimos su longitud como
 el máximo de los pesos de las aristas que conforman dicho camino (recordemos que el peso de cada
@@ -116,7 +122,7 @@ horario de llegada del vuelo $v_{j}$, lo cuál seguramente haría que nuestra so
 sea errónea.
 
 \par A continuación exponemos las etapas inicial y final correspondientes al \texttt{Ejemplo de 
-instancia 2}.
+instancia 2 ?????}.
 
 
 \subsection{Justificación de cota de complejidad}
@@ -162,8 +168,46 @@ Luego, la complejidad de Dijkstra en nuestro problema es $O(n^2)$, donde $n = |V
 \caption{Dijkstra}
 \end{algorithm}
 
-\par Además, esta modificación en el algoritmo no afecta a la correctitud del algoritmo, puesto
-que ...
+\par Además, esta modificación en el algoritmo no afecta a la correctitud del algoritmo. Para demostrar
+la correctitud de Dijkstra, demostramos el siguiente lema: Sea $S_{k}$ la \textbf{zona segura} al 
+finalizar la iteración $k$. Entonces, $\pi(u)$ representa la distancia de un camino mínimo entre $v$
+y $u$ $\forall u \in S_{k}$. \\
+\texttt{Demostración:} También vamos a probar que $\forall u \in V \backslash S_{k}$, $\pi(u)$ 
+representa la distancia de un camino mínimo entre $v$ y $u$ que pasa sólo por $S_{k}$. Además, hay
+que tener en cuenta que en nuestro problema, $v = inicio$.
+\begin{enumerate}
+	\item $k = 0:$ tenemos que $\pi(inicio) = 0$, $\pi(u) = long(inicio,u)$ si hay un eje que une
+	a $inicio$ con $u$ y $\pi(u) = \infty$ si no hay eje que una $inicio$ con $u$. Además, $S_{k} = 
+	\{inicio\} $. Entonces, claramente $\pi(u)$ representa la distancia de un camino mínimo entre 
+	$inicio$ y $u$ $\forall u \in S_ {k}$.
+	\item $k > 0: $ Ahora, vale que $S_{k} = S_{k-1} \cup \{w\} $ donde $\pi(w) = \min_{x \not\in
+	S_{k-1}} \pi(x)$. Basta ver que $\pi(w) = distMin(inicio,w)$. Por HI, $\pi(w)$ es la longitud
+	de camino mínimo entre $inicio$ y $w$ que sólo pasa por $S_{k-1}$. Luego, supongamos que existe un
+	camino $P$ de longitud menor que $\pi(w)$, este camino debería pasar por la zona insegura.
+	Como asumimos que $P \backslash S_{k} \neq \emptyset $ si tomamos $w' \in P \backslash S_{k}$, 
+	como $w' \not\in S_{k-1}$, debería valer $\pi(w') \geq \pi(w)$ y $P(w',w) > 0$, lo cual es
+	\textbf{absurdo}. Luego $\pi(w)$ es la longitud del camino mínimo entre $v$ y $w$. Para terminar
+	la demo, hay que demostrar que el valor de la nueva distancia entre $inicio$ y $u$, $\pi'(u)$
+	es efectivamente $\pi'(u):=min(\pi(u), max(\pi(w), \l(w,u))$. Veamos por casos:
+	\begin{enumerate}
+		\item si el camino óptimo no incluye a $w$, entonces seguro que pasa sólo por $S_{k-1}$ y 
+		entonces, por HI, $\pi'(u) = \pi(u)$.
+		\item si el camino óptimo sí incluye a $w$, entonces veamos lo que sucede: habíamos dicho que
+		por la naturaleza de nuestro problema, siempre va a valer que dada una distancia $\pi(x)$ entre
+		$inicio$ y $x$, siempre va a valer que $( \forall t \in N(x) ) \pi(x) < l(x,t)$. Entonces,
+		$max(\pi(w), l(w,u)) = l(w,u) $. Luego, queremos ver que $\pi'(u):=min(\pi(u), 
+		max(\pi(w), \l(w,u)) = min(\pi(u), l(w,u))$. En efecto, tenemos que el camino sólo puede pasar
+		por $S_{k-1} \cup \{w\}$. Entonces:
+		\begin{enumerate}
+			\item si $\pi(u) < l(w,u)$ no es necesario usar el nodo $w$. Nos quedamos con el camino
+			que teníamos antes y queda que $\pi'(u):=\pi(u)$
+			\item si $\pi(u) > l(w,u)$, yendo primero desde $inicio$ hasta $w$ y luego desde $w$ hasta
+			$u$ a través de $l(w,u)$ tenemos un nuevo camino, de longitud menor que el camino anterior.
+			Quedaría $\pi'(u) := l(w,u)$
+		\end{enumerate}
+		Luego, concluimos que vale lo que queríamos:  $\pi'(u):=min(\pi(u), max(\pi(w), \l(w,u))$.
+	\end{enumerate}
+\end{enumerate}
 
 \par Por otro lado, presentamos un pseudocódigo del algoritmo que programamos para la solución,
 a partir de la utilización del algoritmo de Dijkstra comentado recién. Los pasos que efectuamos 
@@ -175,7 +219,7 @@ son:
         el horario de llegada del vuelo $u$ a su destino
   \item agregamos un nodo ficticio, $inicio$ al grafo, tal que esta unido por una arista con todos
         los vuelos que tienen como origen la localidad $A$. A cada uno de estos ejes le ponemos como
-        pero el horario de salida de cada uno de los respectivos vuelos que quedan unidos a $inicio$.
+        peso el horario de salida de cada uno de los respectivos vuelos que quedan unidos a $inicio$.
   \item corremos el algoritmo de Dijkstra sobre el grafo construido, para calcular el horario mínimo 
         de llegada desde $inicio$ hasta cada uno de los vuelos. Obtenemos un vector de distancias.
   \item a partir del vector de distancias obtenido, chequeamos, de todos los vuelos que son accesibles
