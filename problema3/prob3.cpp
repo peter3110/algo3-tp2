@@ -62,7 +62,7 @@ int main() {
    
   sort(G.begin(), G.end(), cmpEquipos);
   sort(T.begin(), T.end(), cmpEquipos);
-  
+
   vector< pair< pair<int, int>, int > > T2 = T;
   BuscarEjeParaCicloYAgregar(G,T2);		// G y T tienen que estar indexado entre 1..n; tam(T2) = n+2
   
@@ -91,11 +91,13 @@ void read(int &n, int &m, vector< pair< pair<int, int>, int > > &G) {
 }
 
 bool cmpEquipos(pair< pair<int, int>, int > A, pair< pair<int, int>, int > B) {
+  if (A.second == B.second) { return A.first.first < B.first.first;}
+  if (A.second == B.second && A.first == B.first) { return A.first.second < B.first.second;}
   return (A.second < B.second);
 }
 
 vector< vector<int> > matrizDeAdyacencia(vector< pair< pair<int, int>, int > > &G, int n) {
-  vector <vector <int> > res(n+1, std::vector<int>(n+1));
+  vector <vector <int> > res(n+1, std::vector<int>(n+1,-1));
   for(int i=0; i<(int)G.size(); i++) {
       res[G[i].first.first][G[i].first.second] = G[i].second; 	 
       res[G[i].first.second][G[i].first.first] = G[i].second; 	    
@@ -103,7 +105,7 @@ vector< vector<int> > matrizDeAdyacencia(vector< pair< pair<int, int>, int > > &
   int INF = MAX_INT;
   for(int i=1; i<=n; i++) {
 	  for(int j=1; j<=n; j++) {
-		  if(res[i][j] == 0) {res[i][j] = INF;}
+		  if(res[i][j] == -1) {res[i][j] = INF;}
 	  }
   }
   return res;	
@@ -155,12 +157,18 @@ bool sonIguales(pair<int, int> A, pair<int, int> B) {
 
 void BuscarEjeParaCicloYAgregar(vector< pair< pair<int, int>, int > > &G,
                                 vector< pair< pair<int, int>, int > > &T) {	// asumo G y T ordenados
-																			// asumo que G no es un árbol
+	assert(G.size() > T.size());										// asumo que G no es un árbol
+    cout << G[879].first.first << " " << G[879].first.second << endl;
+    cout << T[879].first.first << " " << T[879].first.second << endl;
     bool flag = false;
     int i = 1, j = 1;
     while(flag == false) {
 		bool iguales = sonIguales(G[i].first, T[j].first);
-	    if(!iguales) {							// encuentro primer eje en G y no en T
+	    
+	    bool condicion1 = (!iguales && i<(int)G.size() && j<(int)T.size());
+	    bool condicion2 = (j >= (int)T.size());
+	    
+	    if(condicion1 || condicion2) {					// encuentro primer eje en G y no en T
 			/*insertar al final del vector T y salir. queda vector de tam = n+2 */
 			T.push_back(G[i]);
 			flag = true;
@@ -186,6 +194,7 @@ nodo dfsCiclo(nodo base, vector<int> &visitados, vector<nodo> &G2, vector<int> &
 	  }
   }
   nodo aux; aux.valor = -15;	// nunca debería devolver esto
+  cout << " mal" << endl;
   return aux;
 } 
 
@@ -195,14 +204,17 @@ pair< vector< pair< pair<int, int>, int > >, vector< pair< pair<int, int>, int >
   vector<int> padres(n+2,0);
   vector<nodo> resTemp;				// guardo los nodos pertenecientes al ciclo
   vector<nodo> T2 = generar_grafo_nodos(T,n);
+  
   nodo nodox = dfsCiclo(T2[1],visitados,T2,padres);
   
   resTemp.push_back(nodox);
+  
   int padre = padres[nodox.valor];
   while(padre != nodox.valor) {
       resTemp.push_back(T2[padre]);
       padre = padres[T2[padre].valor];
   }
+  resTemp.push_back(T2[padre]);
   
   vector< pair< pair<int, int>, int > > ciclo, resto;
   vector<int> estan(n+1,0);						// registro qué elementos de T estan en el ciclo
