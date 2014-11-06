@@ -158,8 +158,6 @@ bool sonIguales(pair<int, int> A, pair<int, int> B) {
 void BuscarEjeParaCicloYAgregar(vector< pair< pair<int, int>, int > > &G,
                                 vector< pair< pair<int, int>, int > > &T) {	// asumo G y T ordenados
 	assert(G.size() > T.size());										// asumo que G no es un árbol
-    cout << G[879].first.first << " " << G[879].first.second << endl;
-    cout << T[879].first.first << " " << T[879].first.second << endl;
     bool flag = false;
     int i = 1, j = 1;
     while(flag == false) {
