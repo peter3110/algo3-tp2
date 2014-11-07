@@ -267,12 +267,8 @@ chequear que esto no suceda, una vez que nos aseguramos que $G$ fuera conexo, ch
 la cantidad de ejes de $G$ sea al menos igual a la cantidad de nodos de $G$, en cuyo caso podemos
 estar seguros de que al menos habrá algún ciclo en $G$ y entonces existirá al menos una solución
 para el problema. A continuación, llamamos a la función $primm$, que utilizando el algoritmo de
-primm busca algún AGM en $G$, que lo llamamos $T$. Luego, ordenamos los ejes de $T$ y de $G$ de
-menor a mayor, para hacer una búsqueda en tiempo eficiente de la mínima arista que está en $G$
-y no en $T$, con la función $BuscarEjeParaCicloYAgregar(G,T)$, que agrega dicha arista al 
-árbol $T$. Finalmente, llamamos a la función $BuscarCicloYResto(T)$, que dado un grafo $T$ que 
-sabemos es una solución para nuestro problema, se ocupa de rastrear el conjunto de aristas que 
-forma el ciclo y el conjunto del resto de las aristas. \\
+primm busca algún AGM en $G$, que lo llamamos $T$. Luego, ordenamos los ejes de $G$ de
+menor a mayor y buscamos entre las $n$ menores aristas de G aquella que no esté en T. Finalmente, llamamos a la función $BFS$, que dado un arbol $T$ y una arista $e$ se ocupa de rastrear el conjunto de aristas que forma el ciclo en $T+e$ y el conjunto del resto de las aristas. Para ello busca el camino entre los extremos de e en T (que sabemos que existe y es único por las propiedades de los árboles) y a ese camino le agrega la arista.\\
 Lo que haremos a continuación, es demostrar que todas las funciones que acabamos de especificar
 en efecto tienen un orden de complejidad menor que $O(n^3)$, lo cual implicaría que nuestro
 algoritmo tiene, en efecto, un orden de complejidad menor que $O(n^3)$. \\
@@ -287,79 +283,19 @@ Vamos por partes:
 	\item $primm$: vimos en la teórica que la complejidad del algoritmo de primm es $O(ElogV)$.
 	      Si el grafo $G$ fuera completo (es decir, en el peor caso) y $|V| = n$, entonces 
 	      $|E| = n^2$. En ese caso, la complejidad del algoritmo sería $T(n) = O(n^2 log(n))$. 
-	\item $sort(T)$ y $sort(G)$, donde $G$ y $T$ son una lista de aristas (con sus respectivos pesos) 
-	      que representan al grafo original y a algún AGM de dicho grafo. 
-	      Luego, $|G| \leq n^2$ (si $G$ fuera completo) y $|T| \leq n$ (porque $T$ es un árbol).
-	      Para un arreglo de longitud $k$, la librería standard de C++ nos asegura que la 
+	\item  $sort(G)$, donde $G$ es una lista de aristas (con sus respectivos pesos) 
+	      que representan al grafo original. 
+	      Luego, $|G| \leq n^2$ (si $G$ fuera completo)  Para un arreglo de longitud $k$, la librería standard de C++ nos asegura que la 
 	      complejidad de la función $sort$ es $O(klog(k))$. Entonces, la complejidad de 
-	      $sort(T)$ es de $O(nlog(n))$ y la de $sort(G)$ es $O(n^2 log(n^2)) = O(n^2 2log(n)) = 
-	      O(n^2 log(n))$
-	\item $BuscarEjeParaCicloYAgregar(G,T)$ recorre en el peor caso dos vectores, uno de tamaño
-	      $n^2$ y otro de tamaño $n$, puesto que $G$ y $T$, son dos grafos representados como una lista 
-	      de aristas, ordenada según el peso
-          de cada arista de menor a mayor. $T$ es pasado por referencia, para poder agregarle
-          la arista correspondiente (la menor de las que están en $G$ y no en $T$). Luego, esta 
-          función tiene una complejidad de $O(n^2 + n) = O(n^2)$ en el peor caso.
-	\item en la función $BuscarCicloYResto(T)$ hacemos un llamado a la función $dfsCiclo$, que 
-	      hace es un DFS igual al de la función $dfs$ que llamamos cuando chequeamos
-	      si el grafo es conexo, pero levemente modificado para ir guardándonos el padre de cada uno
-	      de los nodos, para poder posteriormente recuperar todos los ejes pertencientes al ciclo. También 
-	      devuelve algún nodo del único ciclo que tiene $T$. Además, este DFS sólo lo hacemos
-	      para detectar un ciclo. Luego, es posible que no tengamos que recorrer todos los nodos
-	      del grafo. Aparte de esto, esta función cuenta con un $While$, que como máximo ejecuta $n$ veces,
-	      pues la cantidad máxima de nodos que puede tener un ciclo es $n$, y en cada iteración del ciclo,
-	      visitamos un nodo distinto. Por último, hay un doble $For$, que tiene una complejidad de
-	      $O(resTemp.size() * T.size())$, donde $resTemp$ es una lista con los nodos de un ciclo (con lo 
-	      cuál
-	      como máximo puede tener $n$ elementos) y $T$ es un árbol generador de $G$ con un eje agregado, 
-	      y está representado como una lista de ejes (con lo cuál como máximo puede tener $n$ elementos). 
-	      Luego,
-	      la complejidad de este doble $For$ es $O(n^2)$.
-	   
+	      $sort(G)$ es $O(n^2 log(n^2))$. 
+	\item $BFS(T,e)$ Realiza un BFS sobre el arbol (cuya complejidad es $O(n^2)$ utilizando una matriz de adyacencia). Luego en $O(n)$ reconstruye el camino entre los extremos de la arista $e$ , en $O(1)$ agrega al final del mismo a $e$ y en $O(n^2)$ busca, para cada arista en el arbol, qué aristas no están en el ciclo ($O(n^2)$)
+	
 \end{enumerate}
 
-Conclusión: la complejidad de nuestro algoritmo viene dada por la suma de las complejidades de cada
-una de las funciones mencionadas más arriba. Con lo cual, la complejidad de nuestro algoritmo es: 
-$ C(n) = O(n) + O(n^2 log(n)) + O(n^2 log(n)) + O(n^2) + O(n^2) = O(n^2 log(n))$. 
+Conclusión: la complejidad de nuestro algoritmo está dominada por la del sort de la STD.  Con lo cual, la complejidad de nuestro algoritmo es: 
+$ C(n) = O(n^2 log(n))$. 
 
-\begin{algorithm}[H]
-\SetKwInOut{Input}{input}
-\SetKwInOut{Output}{output}
-  \Input{grafo $G$ donde cada nodo es un equipo y cada arista es una conexión entre equipos. 
-         Asumimos que $G$ es conexo y tiene al menos un ciclo y tiene exactamente $n$ aristas}
-  \Output{$<C,R>$, donde $C$ es un conjunto de aristas pertencientes a $E(G)$, que en 
-          particular forman un ciclo, y $R$ es un conjunto de aristas incluidas en $E(G)$.
-          $C$ y $R$ conectan a todos los nodos de $G$ y son el conjunto de aristas óptimo
-          para resolver el problema}
-          
-          vector$<$int$>$ visitados(n) \\
-          vector$<$int$>$ padres(n) \\
-          nodo nodox = dfsCiclo(T2[1],visitados,T2,padres) \\     
-          resTemp = vector donde guardo los nodos del ciclo C \\
-          int padre = padres[nodox.valor] (el padre del primer nodo que sé que pertenece al ciclo C)
-		  vector$<$int$>$ estan(n+1,0) (guardo los indices de los nodos que están en el ciclo) \\
-		  \While{padre $\neq$  nodox.valor}{
-				resTemp.pushback(T2[padre]); \\
-				padre = padres[T2[padre].valor]; \\
-		  }
-		  \For{i = 1 to resTemp.size()}{
-				\For{j = 1 to T.size()}{
-				    si el nodo i está en resTemp y en el árbol T, entonces está en el ciclo: estan[i] = 1
-				}
-		  }
-		  
-		  vector$<$ejes$>$ ciclo, resto
-		  \For{i = 1 to T.size()}{
-		      \eIf{estan[i]==1}{
-		          ciclo.pushback(T[i])
-		      }{
-		          resto.pushback(T[i]);
-		      }
-		  }
-		  return makepair(ciclo,resto);
-		  
-\caption{Algoritmo BuscarCicloYResto}
-\end{algorithm}
+
 
 \subsection{Testeos de complejidad}
 
@@ -410,7 +346,15 @@ $K_{n-1}) en donde queda un nodo aislado, la situacion es diferente, como podrem
 Podemos ver entonces que el algoritmo empleado para detectar conectitud se ve afectado por la cantidad de aristas en el grafo. En particular, su tiempo es lineal respecto a la cantidad de aristas.
 
 
+\subsection{Adicionales}
 
+En una nueva versión del problema se nos solicita una solución para el caso en el que un enlace cambie su costo. Se nos pide que aprovechemos la solución obtenida y se nos consulta sobre el impacto de esta modificación en la complejidad.
+
+Para este caso, sea $f$ la arista que se modifica. Si la agregamos al AGM $T$ que nos devuelve Prim, generariamos un ciclo. Si de ese ciclo eliminamos la arista de menor peso, tendriamos el nuevo AGM correspondiente a la red con ese enlace modificado. Luego podríamos resolver de la misma manera que antes, con la salvedad que, en lugar de volver a ordenar todas las aristas de G, podríamos insertar $f$ en el lugar correspondiente en el vector de aristas. 
+
+Esta modificación agrega el costo de construir un ciclo y el de insertar en forma ordenada. Para construir el ciclo vimos que necesitamos usar BFS que en nuestro caso tarda $O(n^2)$. Para agregar ordenado en un vector tendríamos que copiar el mismo, por lo tanto, tenemos tiempo lineal en el tamaño del vector, osea $O(n^2)$ dado que se trata del vector de aristas (que son $n^2$ en el peor caso). 
+
+Dicho esto, la complejidad teórica del algoritmo no se modifica ya que todas las operaciones siguen costando menos que $O(n^2log(n^2))$.
 
 %% =====================================================================
 
