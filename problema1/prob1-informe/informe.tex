@@ -233,7 +233,29 @@ son:
 
 
 \subsection{Testeos de complejidad}
+En esta sección presentaremos un análisis empírico de la complejidad teórica demostrada anteriormente (O($n^2$)). 
 
+Para ello construimos instancias pseudo-aleatorias de cantidad creciente de vuelos (entre 1000 y 5000). Para las ciudades utilizamos las letras del alfabeto ('a','b','c', etc) y algunos strings con números y mayúsculas (para simular las distintas posibilidades para los nombres). Una vez fijadas las ciudades y los vuelos, construimos las entradas seleccionando dos ciudades (distintas) al azar de la lista que funcionarán como origen y destino. Luego construimos n 4-uplas con 2 ciudades distintas al azar y 2 horarios ,partida y llegada, apropiados (partida < llegada).
+
+Debido a las características de nuestro algoritmo(cuya complejidad está dominada por la de nuestra implementación del algoritmo de \textit{Dijkstra}), el tiempo de ejecución sólo depende de la cantidad de nodos (vuelos) que tenga el grafo que construímos. Por esta razón, varias instancias de igual cantidad de nodos tardarán un tiempo muy similar entre sí (ya sea si el grafo es un $K_n$ \footnote{grafo completo de $n$ nodos} o un camino simple del mismo tamaño). Por este motivo, no mostraremos resultados sobre tiempos de ejecución para instancias particulares ya que no resultan interesantes para este análisis.
+
+Veamos entonces un gráfico sobre la evolución del tiempo de ejecución en función del tamaño de la instancia (cantidad de vuelos):
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graph2.jpg}
+\caption{Gráfico de tiempo de ejecución para instancias de tamaño creciente}
+\end{figure}
+
+A simple vista podemos ver que la curva descripta en el gráfico no es lineal (crece \textit{más rápido}) y podemos sospechar, dada la demostración presentada previamente, que se trata de una función cuadrática. Para intentar proveerle mayor grado de certeza a nuestra sospecha, presentamos el siguiente gráfico:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graphn.jpg}
+\caption{Gráfico de comparación de tiempo de ejecución con $n$}
+\end{figure}
+
+Para la confección de este último gráfico tomamos los tiempos de ejecución y los dividimos por la cantidad de vuelos. Esta operación produjo una función aparentemente lineal lo cual nos brinda mayor certeza sobre la complejidad propuesta (al menos para instancias de tamaño entre 1000 y 5000).
 
 
 %% =====================================================================
