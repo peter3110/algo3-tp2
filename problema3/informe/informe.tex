@@ -363,6 +363,53 @@ $ C(n) = O(n) + O(n^2 log(n)) + O(n^2 log(n)) + O(n^2) + O(n^2) = O(n^2 log(n))$
 
 \subsection{Testeos de complejidad}
 
+En esta sección presentaremos un análisis empírico de la complejidad teórica demostrada anteriormente ( O($n^2log(n^2)$). A su vez presentaremos ejemplos de tipos de instancias particulares cuyo tiempo de ejecución resultó considerablemente menor al peor caso demostrado.
+
+
+Para la comprobación empírica de la complejidad empleamos instancias de entre 100 y 500 nodos. Las instancias fueron construidas tomando al azar $n-1$ nodos, formando un $K_{n-1}$ entre ellos y uniendo el nodo restante mediante una arista a cualquiera de los del $K_{n-1}$. Dado que nuestro algoritmo utiliza la función sort de la STD \footnote{\url{http://en.cppreference.com/w/cpp/algorithm/sort}} y, como comprobamos en la experimentación del primer trabajo práctico de la materia, dicha función \textit{aprovecha} el orden en el que le llegan los parámetros a ordenar, decidimos que todas las aristas tengan el mismo peso y no \textit{randomizar} el mismo para evitar mejores y peores casos en este sentido. 
+
+Veamos entonces cómo aumenta el tiempo de ejecución a medida que crece la cantidad de nodos en la instancia: 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graph3.jpg}
+\caption{Gráfico de tiempo de ejecución en función de la cantidad de nodos de la instancia}
+\end{figure}
+
+Dado que se nos solicitó que la complejidad temporal fuera estrictamente menor que O($n^3$), dividimos los tiempos obtenidos por la cantidad de nodos al cubo en cada caso. Como podemos ver en el siguiente gráfico, al realizar la comparación obtenemos una función con comportamiento decreciente, lo que muestra experimentalmente que nos ajustamos a la cota establecida.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graph4.jpg}
+\caption{Gráfico de comparación con $n^3$}
+\end{figure}
+
+Como propopusimos anteriormente, debido a que tenemos que ordenar todas las aristas del grafo, nuestro algoritmo está dominado por la complejidad del \textit{sort} de la STD y por lo tanto obtenemos una complejidad de O($n^2log(n^2)$. Para verificar esta afirmación (al menos en un conjunto de prueba), comparamos ahora los tiempos de ejecución con $nlog(n^2)$ esperando obtener una función lineal. Efectivamente fue lo que obtuvimos:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graph1.jpg}
+\caption{Gráfico de comparación con $nlog(n^2)$}
+\end{figure}
+
+Consideramos que las desviaciones que se perciben corresponden a alteraciones en la ejecución debido al uso de CPU en ese momento y no dependen de la instancia. Una forma posible de reducir este tipo de errores consiste en, por ejemplo, repetir la medición en distintos momentos y tomar un promedio.
+
+Debido a que el comportamiento de la función \textit{sort} ya fue analizado en un trabajo previo, para esta experimentación nos enfocamos en los algoritmos implementados por nosotros. Tanto el algoritmo que arma el AGM (prim) como el que busca el ciclo sólo toman en cuenta la cantidad de nodos del grafo y, por lo tanto, analizar diferentes familias de casos no aportaría aspectos interesantes de los mismos. Sin embargo, en los casos en los que no hay solución sí pudimos encontrar instancias en los que el chequeo resulta inmediato y casos en los que no para grafos con la misma cantidad de nodos. 
+
+Recordemos que para el problema planteado, si la red de la entrada no es conexa o es un camino simple, el problema no tiene solución. Mientras que la detección de caminos simples o conectitud para grafos de pocas aristas resulta muy rápida, a medida que aumentan las aristas, esta detección se vuelve cada vez más lenta. Así, para casos de entre 100 y 500 nodos, detectar un camino simple o  falta de conectitud con pocas aristas (menos aristas que nodos) consume menos de $0.001$ segundos en todos los casos. Sin embargo, si tomamos el caso extremo de no conectitud (
+
+$K_{n-1}) en donde queda un nodo aislado, la situacion es diferente, como podremos apreciar en el siguiente grafico:$
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/graph2.jpg}
+\caption{Gráfico de tiempo de ejecución para instancias grandes sin solución}
+\end{figure}
+
+
+Podemos ver entonces que el algoritmo empleado para detectar conectitud se ve afectado por la cantidad de aristas en el grafo. En particular, su tiempo es lineal respecto a la cantidad de aristas.
+
+
 
 
 %% =====================================================================
