@@ -19,6 +19,25 @@
 \includegraphics[scale=0.5]{imagenes/plane.jpg}
 \end{figure}
 
+\subsection{Adicionales}
+Si cada vuelo perteneciera a una aerolínea distinta, esto no afectaría la complejidad
+de nuestro algoritmo: lo que deberíamos hacer para lidiar con este nuevo problema 
+sería tener un arreglo, $aerolinea$ que para cada vuelo (los vuelos están numerados de 1 a $n$) nos
+diga (en $O(1)$) a qué aerolínea corresponde. Entonces, cuando armamos la matriz de 
+adyacencias para representar a nuestro grafo dirigido, vamos a tener que considerar esta
+nueva restricción para que efectivamente sea posible combinar cada par de vuelos. Bajo las
+nuevas condiciones impuestas, para decir que hay forma de combinar dos vuelos $a$ y $b$, 
+cuando armemos la matriz de adyacencia, vamos a tener que considerar dos posibilidades: 
+\begin{enumerate}
+	\item si $aerolinea[a] = aerolinea[b]$, que el destino del vuelo $a$ sea el mismo que 
+	el origen de vuelo $b$ y que haya por lo menos \textbf{una} hora de diferencia entre la llegada 
+	a su destino del vuelo $a$ y la salida de su origen del vuelo $b$ (aquí relajamos una 
+	condición, pues antes había que chequear que hubieran al menos dos horas de diferencia).
+	\item si $aerolinea[a] \neq aerolinea[b]$, que el destino del vuelo $a$ sea el mismo que
+	el origen del vuelo $b$, que haya por lo menos 2 horas de diferencia entre la llegada a su
+	destino del vuelo $a$ y la salida del vuelo $b$ (igual que antes).
+\end{enumerate}
+
 \subsection{Descripción del problema a resolver}
 En el presente problema, nos encontramos con una lista de vuelos internacionales
 entre distintos países. Cada vuelo tiene un origen, un destino y horarios de 
@@ -216,7 +235,9 @@ son:
   \item leer la entrada, y guardar una lista con todos los vuelos disponibles
   \item a partir de la lista de vuelos, armar un grafo dirigido, representado según una matriz de 
         adyacencias. Como dijimos, cada nodo será un vuelo y el peso de cada arista $(u,v)$ será
-        el horario de llegada del vuelo $u$ a su destino
+        el horario de llegada del vuelo $u$ a su destino. Cada par de vuelos estarán unidos por una
+        arista si y sólo si es posible combinar dichos vuelos bajo las condiciones impuestas por el
+        problema.
   \item agregamos un nodo ficticio, $inicio$ al grafo, tal que esta unido por una arista con todos
         los vuelos que tienen como origen la localidad $A$. A cada uno de estos ejes le ponemos como
         peso el horario de salida de cada uno de los respectivos vuelos que quedan unidos a $inicio$.
